@@ -1,0 +1,57 @@
+resources:
+  jobs:
+    end_to_end_heathcare_project_job:
+      name: end-to-end-heathcare-project-job
+      tasks:
+        - task_key: diagnosis_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../databricklearning/bronze/diagnosis_raw_data_ingestion
+            source: WORKSPACE
+        - task_key: diagosis_silver_task
+          depends_on:
+            - task_key: diagnosis_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../databricklearning/silver/dim_diagnosis_ingestion
+            source: WORKSPACE
+        - task_key: hospital_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../databricklearning/bronze/hospitals_raw_data_ingestion
+            source: WORKSPACE
+        - task_key: hospital_silver_ingestion_task
+          depends_on:
+            - task_key: hospital_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../databricklearning/silver/dim_hospital_ingestion
+            source: WORKSPACE
+        - task_key: patients_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../databricklearning/bronze/patients_raw_data_ingestion
+            source: WORKSPACE
+        - task_key: patient_silver_ingestion_task
+          depends_on:
+            - task_key: patients_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../databricklearning/silver/dim_patient_ingestion
+            source: WORKSPACE
+        - task_key: visit_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../databricklearning/bronze/visits_raw_data_ingestion
+            source: WORKSPACE
+        - task_key: visit_silver_ingestion_task
+          depends_on:
+            - task_key: visit_raw_ingestion_task
+            - task_key: hospital_silver_ingestion_task
+            - task_key: patient_silver_ingestion_task
+            - task_key: diagosis_silver_task
+          notebook_task:
+            notebook_path: ../databricklearning/silver/fact_visit_ingestion
+            source: WORKSPACE
+        - task_key: resubmission_analysis
+          depends_on:
+            - task_key: visit_silver_ingestion_task
+          notebook_task:
+            notebook_path: ../databricklearning/gold/resubmission_analysis.
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
